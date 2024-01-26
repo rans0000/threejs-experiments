@@ -1,0 +1,20 @@
+{
+  "name": "ThreeJS-Experiments",
+  "version": "0.1.0",
+  "description": "ThreeJS experiments",
+  "source": "src/index.html",
+  "author": "rans0000@gmail.com",
+  "license": "ISC",
+  "scripts": {
+    "start": "parcel src/*.html --public-url / --open",
+    "build": "parcel build src/*.html --no-cache --public-url ./"
+  },
+  "dependencies": {
+    "three": "^0.160.1"
+  },
+  "devDependencies": {
+    "@parcel/transformer-sass": "2.11.0",
+    "@types/three": "^0.160.0",
+    "parcel": "^2.11.0"
+  }
+}
