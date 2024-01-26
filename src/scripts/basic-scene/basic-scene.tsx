@@ -1,5 +1,5 @@
-import * as THREE from 'three';
 import { GUI } from 'dat.gui';
+import * as THREE from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module';
 
 // scene & render setup
@@ -14,8 +14,10 @@ camera.lookAt(0, 0, 0);
 
 //config setup
 document.body.appendChild(renderer.domElement);
+let collidables: THREE.Mesh[] = [];
 const gui = new GUI();
 const stats = new Stats();
+const raycaster = new THREE.Raycaster();
 document.body.append(stats.dom);
 
 //resize setup
@@ -32,8 +34,25 @@ const boxGeom = new THREE.BoxGeometry(1, 1, 1);
 const boxMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(boxGeom, boxMat);
 scene.add(cube);
+collidables.push(cube);
 gui.add(cube.rotation, 'x', 0, Math.PI * 2);
 gui.add(cube.rotation, 'y', 0, Math.PI * 2);
+
+//mousemove setup
+function trackCursor(event: MouseEvent) {
+    const mouse = {
+        x: (event.clientX / renderer.domElement.clientWidth) * 2 - 1,
+        y: -(event.clientY / renderer.domElement.clientHeight) * 2 + 1
+    };
+
+    raycaster.setFromCamera(new THREE.Vector2(mouse.x, mouse.y), camera);
+    const intersects = raycaster.intersectObjects(collidables, false);
+
+    if (intersects.length > 0) {
+        console.log(intersects);
+    }
+}
+renderer.domElement.addEventListener('mousedown', trackCursor, false);
 
 function animate() {
     requestAnimationFrame(animate);
