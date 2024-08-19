@@ -9,7 +9,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 //camera setup
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 10);
+camera.position.set(0, 5, 10);
 camera.lookAt(0, 0, 0);
 
 //config setup
@@ -19,6 +19,11 @@ const gui = new GUI();
 const stats = new Stats();
 const raycaster = new THREE.Raycaster();
 document.body.append(stats.dom);
+
+const gridHelper = new THREE.GridHelper(10);
+const axisHelper = new THREE.AxesHelper(3);
+scene.add(gridHelper);
+scene.add(axisHelper);
 
 //resize setup
 function onWindowResize() {
