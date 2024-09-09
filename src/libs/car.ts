@@ -9,9 +9,14 @@ class Car extends Entity {
     constructor(scene: Scene, world: World) {
         super(scene, 'car');
         this.world = world;
-        const { geometry, rigidbody } = this.createCar(world);
+    }
+
+    addToScene(scene?: Scene): this {
+        const { geometry, rigidbody } = this.createCar(this.world);
         this.geometry = geometry;
         this.rigidBody = rigidbody;
+
+        return super.addToScene(scene);
     }
 
     createCar(world: World) {

@@ -14,7 +14,7 @@ class Entity {
         this.entityType = entityType;
     }
 
-    addToScene(scene?: Scene) {
+    addToScene(scene?: Scene): this {
         if (!this.geometry) {
             throw "No geometry exists to add to the scene in 'addToScene()'!!";
         }
@@ -22,6 +22,7 @@ class Entity {
             throw "No scene supplied to add to the scene in 'addToScene()'!!";
         }
         this.scene.add(this.geometry || scene);
+        return this;
     }
 
     removeFromScene() {
