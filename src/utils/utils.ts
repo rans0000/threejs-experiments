@@ -1,7 +1,9 @@
 import { World } from '@dimforge/rapier3d-compat';
 import { PerspectiveCamera, Scene, SpotLight, VSMShadowMap, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
+import { TBuildScene } from './types';
 
 function createBitmask(indices: number[]): string {
     let bitmask = 0;
@@ -15,8 +17,11 @@ export function generateCollisionId(members: number[], filters: number[]): numbe
     const filterId = createBitmask(filters);
     return parseInt(memberId + filterId, 2);
 }
-
-export function initBasicScene() {
+export function initBasicScene(_config?: Partial<TBuildScene>) {
+    const config: TBuildScene = {
+        camera: 'orbit',
+        ..._config
+    };
     // setup the scene
     const gravity = { x: 0, y: -9.81, z: 0 };
     const world = new World(gravity);
@@ -52,9 +57,21 @@ export function initBasicScene() {
     });
 
     // setup camera controls
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.target.y = 1;
+    let controls: OrbitControls | PointerLockControls;
+    if (config.camera === 'orbit') {
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.y = 1;
+    } else {
+        controls = new PointerLockControls(camera, renderer.domElement);
+        document.addEventListener(
+            'click',
+            () => {
+                controls instanceof PointerLockControls && controls.lock();
+            },
+            false
+        );
+    }
 
     // setup stats
     const stats = new Stats();

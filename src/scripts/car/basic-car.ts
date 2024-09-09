@@ -4,6 +4,7 @@ import { Entity, RenderableEntity } from 'src/libs/entity';
 import RapierDebugRenderer from 'src/utils/debug-renderer';
 import { initBasicScene } from 'src/utils/utils';
 import { BoxGeometry, Clock, Mesh, MeshPhongMaterial } from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 
 const entities: Entity[] = [];
@@ -14,7 +15,9 @@ const options = {};
 
 init().then(() => {
     // initialize the scene
-    const { world, scene, camera, controls, renderer, stats } = initBasicScene();
+    const { world, scene, camera, controls, renderer, stats } = initBasicScene({
+        camera: 'pointerLock'
+    });
 
     // setup geometry and colliders
     buildScene(entities, scene, world);
@@ -37,7 +40,7 @@ init().then(() => {
             entity.update();
         }
 
-        controls.update();
+        controls instanceof OrbitControls && controls.update();
         rapierDebugRenderer.update();
         renderer.render(scene, camera);
         stats.update();
