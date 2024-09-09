@@ -6,21 +6,21 @@ class Entity {
     id: number;
     scene: Scene;
     entityType: string;
-    object: Object3D;
+    geometry: Object3D;
 
-    constructor(scene: Scene, object: Object3D, entityType: string) {
+    constructor(scene: Scene, geometry: Object3D, entityType: string) {
         this.id = ++_id;
         this.scene = scene;
-        this.object = object;
+        this.geometry = geometry;
         this.entityType = entityType;
     }
 
     addToScene() {
-        this.scene.add(this.object);
+        this.scene.add(this.geometry);
     }
 
     removeFromScene() {
-        this.scene.remove(this.object);
+        this.scene.remove(this.geometry);
     }
 
     update() {
@@ -31,8 +31,8 @@ class Entity {
 class PhysicsEntity extends Entity {
     collider: RAPIER.RigidBody;
 
-    constructor(scene: Scene, object: Object3D, entityType: string, collider: RAPIER.RigidBody) {
-        super(scene, object, entityType);
+    constructor(scene: Scene, geometry: Object3D, entityType: string, collider: RAPIER.RigidBody) {
+        super(scene, geometry, entityType);
         this.collider = collider;
     }
 }

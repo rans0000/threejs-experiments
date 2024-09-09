@@ -131,18 +131,18 @@ class RendeableEntity extends PhysicsEntity {
 
     constructor(
         scene: THREE.Scene,
-        object: THREE.Object3D,
+        geometry: THREE.Object3D,
         entityType: string,
         collider: RAPIER.RigidBody
     ) {
-        super(scene, object, entityType, collider);
+        super(scene, geometry, entityType, collider);
     }
 
     update(): this {
         let temp = this.collider.translation();
-        this.object.position.set(temp.x, temp.y, temp.z);
+        this.geometry.position.set(temp.x, temp.y, temp.z);
         temp = this.collider.rotation();
-        this.object.quaternion.copy(new THREE.Quaternion(temp.x, temp.y, temp.z));
+        this.geometry.quaternion.copy(new THREE.Quaternion(temp.x, temp.y, temp.z));
         return this;
     }
 }
