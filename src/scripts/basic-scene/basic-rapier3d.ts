@@ -1,5 +1,5 @@
 import RAPIER from '@dimforge/rapier3d-compat';
-import { Entity, PhysicsEntity } from 'src/libs/entity';
+import { Entity, PhysicsEntity, RenderableEntity } from 'src/libs/entity';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
@@ -125,24 +125,3 @@ function buildScene(entities: Entity[], scene: THREE.Scene, world: RAPIER.World)
 
 // -----------------------------------------------------------
 // -----------------------------------------------------------
-
-class RenderableEntity extends PhysicsEntity {
-    collider: RAPIER.RigidBody;
-
-    constructor(
-        scene: THREE.Scene,
-        geometry: THREE.Object3D,
-        entityType: string,
-        collider: RAPIER.RigidBody
-    ) {
-        super(scene, geometry, entityType, collider);
-    }
-
-    update(): this {
-        let temp = this.collider.translation();
-        this.geometry.position.set(temp.x, temp.y, temp.z);
-        temp = this.collider.rotation();
-        this.geometry.quaternion.copy(new THREE.Quaternion(temp.x, temp.y, temp.z));
-        return this;
-    }
-}

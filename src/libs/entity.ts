@@ -1,5 +1,5 @@
 import RAPIER from '@dimforge/rapier3d-compat';
-import { Scene, Object3D } from 'three';
+import { Scene, Object3D, Quaternion } from 'three';
 
 let _id = -1;
 class Entity {
@@ -37,4 +37,25 @@ class PhysicsEntity extends Entity {
     }
 }
 
-export { Entity, PhysicsEntity };
+class RenderableEntity extends PhysicsEntity {
+    collider: RAPIER.RigidBody;
+
+    constructor(
+        scene: THREE.Scene,
+        geometry: THREE.Object3D,
+        entityType: string,
+        collider: RAPIER.RigidBody
+    ) {
+        super(scene, geometry, entityType, collider);
+    }
+
+    update(): this {
+        let temp = this.collider.translation();
+        this.geometry.position.set(temp.x, temp.y, temp.z);
+        temp = this.collider.rotation();
+        this.geometry.quaternion.copy(new Quaternion(temp.x, temp.y, temp.z));
+        return this;
+    }
+}
+
+export { Entity, PhysicsEntity, RenderableEntity };
