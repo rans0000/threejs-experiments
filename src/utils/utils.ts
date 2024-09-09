@@ -1,6 +1,7 @@
 import { World } from '@dimforge/rapier3d-compat';
 import { PerspectiveCamera, Scene, SpotLight, VSMShadowMap, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import Stats from 'three/examples/jsm/libs/stats.module';
 
 function createBitmask(indices: number[]): string {
     let bitmask = 0;
@@ -55,11 +56,16 @@ export function initBasicScene() {
     controls.enableDamping = true;
     controls.target.y = 1;
 
+    // setup stats
+    const stats = new Stats();
+    document.body.appendChild(stats.dom);
+
     return {
         world,
         scene,
         renderer,
         camera,
-        controls
+        controls,
+        stats
     };
 }

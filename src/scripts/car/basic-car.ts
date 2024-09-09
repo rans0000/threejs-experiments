@@ -1,6 +1,7 @@
 import { ColliderDesc, init, RigidBodyDesc, World } from '@dimforge/rapier3d-compat';
 import Car from 'src/libs/car';
 import { Entity, RenderableEntity } from 'src/libs/entity';
+import RapierDebugRenderer from 'src/utils/debug-renderer';
 import { initBasicScene } from 'src/utils/utils';
 import { BoxGeometry, Clock, Mesh, MeshPhongMaterial } from 'three';
 
@@ -11,7 +12,7 @@ const entities: Entity[] = [];
 
 init().then(() => {
     // initialize the scene
-    const { world, scene, camera, controls, renderer } = initBasicScene();
+    const { world, scene, camera, controls, renderer, stats } = initBasicScene();
 
     // setup geometry and colliders
     buildScene(entities, scene, world);
@@ -19,6 +20,7 @@ init().then(() => {
     // setup the loop
     const clock = new Clock();
     let delta;
+    const rapierDebugRenderer = new RapierDebugRenderer(scene, world);
 
     function gameLoop() {
         delta = clock.getDelta();
@@ -30,7 +32,9 @@ init().then(() => {
         }
 
         controls.update();
+        rapierDebugRenderer.update();
         renderer.render(scene, camera);
+        stats.update();
         window.requestAnimationFrame(gameLoop);
     }
 
