@@ -12,11 +12,11 @@
         "deploy": "gh-pages -d dist"
     },
     "dependencies": {
+        "@dimforge/rapier3d-compat": "^0.14.0",
         "dat.gui": "^0.7.9",
         "three": "^0.160.1"
     },
     "devDependencies": {
-        "@dimforge/rapier3d-compat": "^0.14.0",
         "@parcel/transformer-sass": "2.11.0",
         "@types/dat.gui": "^0.7.12",
         "@types/three": "^0.160.0",
