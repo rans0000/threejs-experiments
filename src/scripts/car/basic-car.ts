@@ -4,8 +4,10 @@ import { Entity, RenderableEntity } from 'src/libs/entity';
 import RapierDebugRenderer from 'src/utils/debug-renderer';
 import { initBasicScene } from 'src/utils/utils';
 import { BoxGeometry, Clock, Mesh, MeshPhongMaterial } from 'three';
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 
 const entities: Entity[] = [];
+const options = {};
 
 // -----------------------------------------------------------
 // -----------------------------------------------------------
@@ -21,6 +23,10 @@ init().then(() => {
     const clock = new Clock();
     let delta;
     const rapierDebugRenderer = new RapierDebugRenderer(scene, world);
+
+    // setup the controls
+    const gui = new GUI();
+    gui.add(rapierDebugRenderer, 'enabled').name('Rapier Degug Renderer');
 
     function gameLoop() {
         delta = clock.getDelta();
