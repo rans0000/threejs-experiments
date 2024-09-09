@@ -1,5 +1,5 @@
-import RAPIER from '@dimforge/rapier3d-compat';
-import { Scene, Object3D, Quaternion } from 'three';
+import RAPIER, { World } from '@dimforge/rapier3d-compat';
+import { Object3D, Quaternion, Scene } from 'three';
 
 let _id = -1;
 class Entity {
@@ -8,18 +8,26 @@ class Entity {
     entityType: string;
     geometry: Object3D;
 
-    constructor(scene: Scene, geometry: Object3D, entityType: string) {
+    constructor(scene: Scene, entityType: string) {
         this.id = ++_id;
         this.scene = scene;
-        this.geometry = geometry;
         this.entityType = entityType;
     }
 
-    addToScene() {
-        this.scene.add(this.geometry);
+    addToScene(scene?: Scene) {
+        if (!this.geometry) {
+            throw "No geometry exists to add to the scene in 'addToScene()'!!";
+        }
+        if (!this.geometry && !scene) {
+            throw "No scene supplied to add to the scene in 'addToScene()'!!";
+        }
+        this.scene.add(this.geometry || scene);
     }
 
     removeFromScene() {
+        if (!this.geometry) {
+            throw "No geometry exist to remove to the scene in 'removeFromScene()'!!";
+        }
         this.scene.remove(this.geometry);
     }
 
@@ -28,34 +36,30 @@ class Entity {
     }
 }
 
-class PhysicsEntity extends Entity {
-    collider: RAPIER.RigidBody;
-
-    constructor(scene: Scene, geometry: Object3D, entityType: string, collider: RAPIER.RigidBody) {
-        super(scene, geometry, entityType);
-        this.collider = collider;
-    }
-}
-
-class RenderableEntity extends PhysicsEntity {
-    collider: RAPIER.RigidBody;
+class RenderableEntity extends Entity {
+    world: World;
+    rigidBody: RAPIER.RigidBody;
 
     constructor(
         scene: THREE.Scene,
+        world: World,
         geometry: THREE.Object3D,
         entityType: string,
-        collider: RAPIER.RigidBody
+        rigidBody: RAPIER.RigidBody
     ) {
-        super(scene, geometry, entityType, collider);
+        super(scene, entityType);
+        this.geometry = geometry;
+        this.world = world;
+        this.rigidBody = rigidBody;
     }
 
     update(): this {
-        let temp = this.collider.translation();
+        let temp = this.rigidBody.translation();
         this.geometry.position.set(temp.x, temp.y, temp.z);
-        temp = this.collider.rotation();
+        temp = this.rigidBody.rotation();
         this.geometry.quaternion.copy(new Quaternion(temp.x, temp.y, temp.z));
         return this;
     }
 }
 
-export { Entity, PhysicsEntity, RenderableEntity };
+export { Entity, RenderableEntity };
