@@ -16,7 +16,8 @@
         "noImplicitReturns": true,
         "noUncheckedIndexedAccess": false,
         "noUnusedLocals": true,
-        "noUnusedParameters": true
+        "noUnusedParameters": true,
+        "module": "ES2022"
     },
     "include": ["./**/*.ts"],
     "exclude": ["node_modules/**/*"]
