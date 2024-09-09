@@ -1,33 +1,148 @@
 import RAPIER from '@dimforge/rapier3d-compat';
+import { Entity, PhysicsEntity } from 'src/libs/entity';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+
+const entities: PhysicsEntity[] = [];
+
+// -----------------------------------------------------------
+// -----------------------------------------------------------
 
 RAPIER.init().then(() => {
-    // Use the RAPIER module here.
-    let gravity = { x: 0.0, y: -9.81, z: 0.0 };
-    let world = new RAPIER.World(gravity);
+    // initialize the scene
+    const { world, scene, camera, controls, renderer } = init();
 
-    // Create the ground
-    let groundColliderDesc = RAPIER.ColliderDesc.cuboid(10.0, 0.1, 10.0);
-    world.createCollider(groundColliderDesc);
+    // setup geometry and colliders
+    buildScene(entities, scene, world);
 
-    // Create a dynamic rigid-body.
-    let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic().setTranslation(0.0, 1.0, 0.0);
-    let rigidBody = world.createRigidBody(rigidBodyDesc);
+    // setup the loop
+    const clock = new THREE.Clock();
+    let delta;
 
-    // Create a cuboid collider attached to the dynamic rigidBody.
-    let colliderDesc = RAPIER.ColliderDesc.cuboid(0.5, 0.5, 0.5);
-    let collider = world.createCollider(colliderDesc, rigidBody);
-
-    // Game loop. Replace by your own game loop system.
-    let gameLoop = () => {
-        // Step the simulation forward.
+    function gameLoop() {
+        delta = clock.getDelta();
+        world.timestep = Math.min(delta, 0.1);
         world.step();
 
-        // Get and print the rigid-body's position.
-        let position = rigidBody.translation();
-        console.log('Rigid-body position: ', position.x, position.y);
+        for (const entity of entities) {
+            entity.update();
+        }
 
-        setTimeout(gameLoop, 16);
-    };
+        controls.update();
+        renderer.render(scene, camera);
+        window.requestAnimationFrame(gameLoop);
+    }
 
-    gameLoop();
+    window.requestAnimationFrame(gameLoop);
 });
+
+// -----------------------------------------------------------
+// -----------------------------------------------------------
+function init() {
+    // setup the scene
+    const gravity = { x: 0, y: -9.81, z: 0 };
+    const world = new RAPIER.World(gravity);
+
+    // setup threejs
+    const scene = new THREE.Scene();
+
+    // setup the light
+    const light = new THREE.SpotLight(undefined, Math.PI * 10);
+    light.position.set(2.5, 5, 5);
+    light.angle = Math.PI / 3;
+    light.penumbra = 0.5;
+    light.castShadow = true;
+    light.shadow.blurSamples = 10;
+    light.shadow.radius = 5;
+    scene.add(light);
+
+    // setup the camera
+    const camera = new THREE.PerspectiveCamera(
+        50,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        100
+    );
+    camera.position.set(0, 2, 5);
+
+    // setup renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.VSMShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // setup camera controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.target.y = 1;
+
+    return {
+        world,
+        scene,
+        renderer,
+        camera,
+        controls
+    };
+}
+
+// -----------------------------------------------------------
+// -----------------------------------------------------------
+
+function buildScene(entities: Entity[], scene: THREE.Scene, world: RAPIER.World) {
+    // setup the cube
+    const cubeMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshNormalMaterial());
+    cubeMesh.castShadow = true;
+    const cubeBody = world.createRigidBody(
+        RAPIER.RigidBodyDesc.dynamic().setTranslation(0, 5, 0).setCanSleep(false)
+    );
+    const cubeShape = RAPIER.ColliderDesc.cuboid(0.5, 0.5, 0.5).setMass(1).setRestitution(0.2);
+    world.createCollider(cubeShape, cubeBody);
+    const cube = new RendeableEntity(scene, cubeMesh, 'cube', cubeBody);
+    cube.addToScene();
+    entities.push(cube);
+
+    // setup the floor
+    const floorMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(100, 1, 100),
+        new THREE.MeshPhongMaterial()
+    );
+    floorMesh.receiveShadow = true;
+    floorMesh.position.y = -1;
+    const floorBody = world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, -1, 0));
+    const floorShape = RAPIER.ColliderDesc.cuboid(50, 0.5, 50);
+    world.createCollider(floorShape, floorBody);
+    const floor = new RendeableEntity(scene, floorMesh, 'floor', floorBody);
+    floor.addToScene();
+    entities.push(floor);
+}
+
+// -----------------------------------------------------------
+// -----------------------------------------------------------
+
+class RendeableEntity extends PhysicsEntity {
+    collider: RAPIER.RigidBody;
+
+    constructor(
+        scene: THREE.Scene,
+        object: THREE.Object3D,
+        entityType: string,
+        collider: RAPIER.RigidBody
+    ) {
+        super(scene, object, entityType, collider);
+    }
+
+    update(): this {
+        let temp = this.collider.translation();
+        this.object.position.set(temp.x, temp.y, temp.z);
+        temp = this.collider.rotation();
+        this.object.quaternion.copy(new THREE.Quaternion(temp.x, temp.y, temp.z));
+        return this;
+    }
+}
