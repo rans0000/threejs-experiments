@@ -2,6 +2,19 @@ import RAPIER from '@dimforge/rapier3d-compat';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
+function createBitmask(indices: number[]): string {
+    let bitmask = 0;
+    for (let index of indices) {
+        bitmask |= 1 << index;
+    }
+    return bitmask.toString(2).padStart(16, '0');
+}
+export function generateCollisionId(members: number[], filters: number[]): number {
+    const memberId = createBitmask(members);
+    const filterId = createBitmask(filters);
+    return parseInt(memberId + filterId, 2);
+}
+
 export function initBasicScene() {
     // setup the scene
     const gravity = { x: 0, y: -9.81, z: 0 };

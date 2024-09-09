@@ -19,7 +19,7 @@ class Car extends Entity {
         const geometry = new Mesh(new BoxGeometry(1, 1, 1), new MeshNormalMaterial());
         geometry.castShadow = true;
         const rigidbody = world.createRigidBody(
-            RigidBodyDesc.dynamic().setTranslation(0, 5, 0).setCanSleep(false)
+            RigidBodyDesc.dynamic().setTranslation(0, 0.5, 0).setCanSleep(false)
         );
         const cubeShape = ColliderDesc.cuboid(0.5, 0.5, 0.5).setMass(1).setRestitution(0.2);
         world.createCollider(cubeShape, rigidbody);
@@ -35,7 +35,6 @@ class Car extends Entity {
         this.geometry.position.set(temp.x, temp.y, temp.z);
         temp = this.rigidBody.rotation();
         this.geometry.quaternion.copy(new Quaternion(temp.x, temp.y, temp.z));
-        console.log(temp);
 
         return this;
     }
