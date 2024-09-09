@@ -104,7 +104,7 @@ function buildScene(entities: Entity[], scene: THREE.Scene, world: RAPIER.World)
     );
     const cubeShape = RAPIER.ColliderDesc.cuboid(0.5, 0.5, 0.5).setMass(1).setRestitution(0.2);
     world.createCollider(cubeShape, cubeBody);
-    const cube = new RendeableEntity(scene, cubeMesh, 'cube', cubeBody);
+    const cube = new RenderableEntity(scene, cubeMesh, 'cube', cubeBody);
     cube.addToScene();
     entities.push(cube);
 
@@ -118,7 +118,7 @@ function buildScene(entities: Entity[], scene: THREE.Scene, world: RAPIER.World)
     const floorBody = world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(0, -1, 0));
     const floorShape = RAPIER.ColliderDesc.cuboid(50, 0.5, 50);
     world.createCollider(floorShape, floorBody);
-    const floor = new RendeableEntity(scene, floorMesh, 'floor', floorBody);
+    const floor = new RenderableEntity(scene, floorMesh, 'floor', floorBody);
     floor.addToScene();
     entities.push(floor);
 }
@@ -126,7 +126,7 @@ function buildScene(entities: Entity[], scene: THREE.Scene, world: RAPIER.World)
 // -----------------------------------------------------------
 // -----------------------------------------------------------
 
-class RendeableEntity extends PhysicsEntity {
+class RenderableEntity extends PhysicsEntity {
     collider: RAPIER.RigidBody;
 
     constructor(
