@@ -25,7 +25,7 @@ RAPIER.init().then(() => {
         world.step();
 
         for (const entity of entities) {
-            entity.update();
+            entity.update(world.timestep);
         }
 
         controls.update();

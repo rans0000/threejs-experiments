@@ -32,7 +32,7 @@ class Entity {
         this.scene.remove(this.geometry);
     }
 
-    update() {
+    update(delta: number) {
         throw `update() method not defined for ${this.id}`;
     }
 }
