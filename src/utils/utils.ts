@@ -1,12 +1,12 @@
 import { World } from '@dimforge/rapier3d-compat';
 import {
+    DirectionalLight,
+    Object3D,
     PerspectiveCamera,
     Scene,
     SpotLight,
     VSMShadowMap,
-    WebGLRenderer,
-    Object3D,
-    DirectionalLight
+    WebGLRenderer
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
@@ -36,7 +36,7 @@ export function initBasicScene(
         lightType: 'spot',
         ..._config
     };
-    let pivot = null;
+    let pivot: Object3D | null = null;
     // setup the scene
     const gravity = { x: 0, y: -9.81, z: 0 };
     const world = new World(gravity);
@@ -52,6 +52,8 @@ export function initBasicScene(
         light.penumbra = 0.5;
     } else {
         light = new DirectionalLight(0xffffff, 0.5);
+        light.shadow.camera.near = 0.5;
+        light.shadow.camera.far = 1500;
     }
     light.shadow.blurSamples = 10;
     light.shadow.radius = 5;
@@ -99,20 +101,20 @@ export function initBasicScene(
         // followcam
         pivot = new Object3D();
         const yaw = new Object3D();
-        yaw.rotateY(0.6);
         const pitch = new Object3D();
         scene.add(pivot);
         pivot.add(yaw);
         yaw.add(pitch);
         pitch.add(camera);
+        yaw.rotateY(0.6);
         function onDocumentMouseMove(e: MouseEvent) {
             yaw.rotation.y -= e.movementX * 0.002;
             const v = pitch.rotation.x - e.movementY * 0.002;
-
             // limit range
             if (v > -1 && v < 0.1) {
                 pitch.rotation.x = v;
             }
+            pivot && camera.lookAt(pivot.position);
         }
 
         function onDocumentMouseWheel(e: WheelEvent) {
