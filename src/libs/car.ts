@@ -5,24 +5,46 @@ import {
     RigidBodyDesc,
     World
 } from '@dimforge/rapier3d-compat';
+import { generateCollisionId } from 'src/utils/utils';
 import { Group, Mesh, Object3D, Quaternion, Scene, Vector3 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Entity } from './entity';
+
+type TCollisionGroup = {
+    floorCID: number;
+    carChasisCID: number;
+    wheelCID: number;
+    axelCID: number;
+};
 
 class Car extends Entity {
     world: World;
     rigidBody: RigidBody;
     updatables: [Object3D, RigidBody][];
+    wheelRadius: number;
+    whelHeight: number;
+    static collisionGroup: TCollisionGroup;
 
     path: string;
     followTarget = new Object3D();
     v = new Vector3();
     pivot: Object3D | null;
 
-    constructor(scene: Scene, world: World, path: string, pivot: Object3D | null) {
+    constructor(
+        scene: Scene,
+        world: World,
+        path: string,
+        pivot: Object3D | null,
+        collisionGroup: TCollisionGroup,
+        wheelRadius: number,
+        whelHeight: number
+    ) {
         super(scene, 'car');
         this.world = world;
         this.path = path;
+        Car.collisionGroup = collisionGroup;
+        this.wheelRadius = wheelRadius;
+        this.whelHeight = whelHeight;
 
         // setup initial values
         this.followTarget.position.set(0, 1, 0);
@@ -90,39 +112,43 @@ class Car extends Entity {
                 }
             });
 
-            const wheelRadius = 0.3; //.3
-            const whelHeight = 0.175; //.175
-
             // create shapes for carBody, wheelBodies and axelBodies
+
+            const { floorCID, carChasisCID, wheelCID, axelCID } = Car.collisionGroup;
+            const chasisId = generateCollisionId([carChasisCID], [floorCID]);
+            const wheelId = generateCollisionId([wheelCID], [floorCID]);
+            const axelId = generateCollisionId([axelCID], [0]);
+
             const carShape = (ColliderDesc.convexMesh(new Float32Array(positions)) as ColliderDesc)
                 .setMass(1)
                 .setRestitution(0.5)
                 .setFriction(3)
-                .setCollisionGroups(131073);
-            const wheelBLShape = ColliderDesc.cylinder(whelHeight, wheelRadius)
+                .setCollisionGroups(chasisId);
+
+            const wheelBLShape = ColliderDesc.cylinder(this.whelHeight, this.wheelRadius)
                 .setRotation(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), -Math.PI / 2))
                 .setTranslation(0.1, 0, 0)
                 .setRestitution(0.5)
                 .setFriction(2)
-                .setCollisionGroups(262145);
-            const wheelBRShape = ColliderDesc.cylinder(whelHeight, wheelRadius)
+                .setCollisionGroups(wheelId);
+            const wheelBRShape = ColliderDesc.cylinder(this.whelHeight, this.wheelRadius)
                 .setRotation(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 2))
                 .setTranslation(-0.1, 0, 0)
                 .setRestitution(0.5)
                 .setFriction(2)
-                .setCollisionGroups(262145);
-            const wheelFLShape = ColliderDesc.cylinder(whelHeight, wheelRadius)
+                .setCollisionGroups(wheelId);
+            const wheelFLShape = ColliderDesc.cylinder(this.whelHeight, this.wheelRadius)
                 .setRotation(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 2))
                 .setTranslation(0.1, 0, 0)
                 .setRestitution(0.5)
                 .setFriction(2.5)
-                .setCollisionGroups(262145);
-            const wheelFRShape = ColliderDesc.cylinder(whelHeight, wheelRadius)
+                .setCollisionGroups(wheelId);
+            const wheelFRShape = ColliderDesc.cylinder(this.whelHeight, this.wheelRadius)
                 .setRotation(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 2))
                 .setTranslation(-0.1, 0, 0)
                 .setRestitution(0.5)
                 .setFriction(2.5)
-                .setCollisionGroups(262145);
+                .setCollisionGroups(wheelId);
 
             //joins wheels to car body
             this.world.createImpulseJoint(

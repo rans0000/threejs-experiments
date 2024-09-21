@@ -16,6 +16,12 @@ const config: TBuildScene = {
     fov: 75,
     lightType: 'directional'
 };
+const collisionGroups = {
+    floorCID: 0,
+    carChasisCID: 1,
+    wheelCID: 2,
+    axelCID: 3
+};
 
 // -----------------------------------------------------------
 // -----------------------------------------------------------
@@ -88,7 +94,15 @@ async function buildScene(
     floor.addToScene();
     entities.push(floor);
 
-    const car = new Car(scene, world, './models/sedan-sports.glb', pivot);
+    const car = new Car(
+        scene,
+        world,
+        './models/sedan-sports.glb',
+        pivot,
+        collisionGroups,
+        0.3,
+        0.175
+    );
     await car.init([0, 0, 0], new Vector3(0.3, 0, -0.66), new Vector3(0.3, 0, -0.66));
     entities.push(car);
 }
