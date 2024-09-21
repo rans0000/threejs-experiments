@@ -11,7 +11,7 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
-import { TBuildScene } from './types';
+import { TBuildScene, TKeyMap } from './types';
 
 function createBitmask(indices: number[]): string {
     let bitmask = 0;
@@ -25,10 +25,7 @@ export function generateCollisionId(members: number[], filters: number[]): numbe
     const filterId = createBitmask(filters);
     return parseInt(memberId + filterId, 2);
 }
-export function initBasicScene(
-    keyMap: { [key: string]: boolean } = {},
-    _config?: Partial<TBuildScene>
-) {
+export function initBasicScene(keyMap: TKeyMap = {}, _config?: Partial<TBuildScene>) {
     const config: TBuildScene = {
         camera: 'orbit',
         cameraPos: [0, 2, 5],

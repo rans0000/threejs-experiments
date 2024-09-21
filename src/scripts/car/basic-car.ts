@@ -2,7 +2,7 @@ import { ColliderDesc, init, RigidBodyDesc, World } from '@dimforge/rapier3d-com
 import Car from 'src/libs/car';
 import { Entity, RenderableEntity } from 'src/libs/entity';
 import RapierDebugRenderer from 'src/utils/debug-renderer';
-import { TBuildScene } from 'src/utils/types';
+import { TBuildScene, TKeyMap } from 'src/utils/types';
 import { initBasicScene } from 'src/utils/utils';
 import { AxesHelper, BoxGeometry, Clock, Mesh, MeshPhongMaterial, Object3D, Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
@@ -22,13 +22,13 @@ const collisionGroups = {
     wheelCID: 2,
     axelCID: 3
 };
+const keyMap: TKeyMap = {};
 
 // -----------------------------------------------------------
 // -----------------------------------------------------------
 
 init().then(async () => {
     // initialize the scene
-    const keyMap: { [key: string]: boolean } = {};
     const { world, scene, camera, controls, renderer, pivot, stats } = initBasicScene(
         keyMap,
         config
@@ -101,9 +101,10 @@ async function buildScene(
         pivot,
         collisionGroups,
         0.3,
-        0.175
+        0.175,
+        keyMap
     );
-    await car.init([0, 0, 0], new Vector3(0.3, 0, -0.66), new Vector3(0.3, 0, -0.66));
+    await car.init([0, 0, 0], new Vector3(0.4, 0.1, -0.66), new Vector3(0.4, 0.1, -0.66));
     entities.push(car);
 }
 

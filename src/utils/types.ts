@@ -4,3 +4,5 @@ export type TBuildScene = {
     fov: number;
     lightType: 'spot' | 'directional';
 };
+
+export type TKeyMap = { [key: string]: boolean };
