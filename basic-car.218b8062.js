@@ -651,7 +651,7 @@ async function buildScene(entities, scene, world, pivot) {
     const floor = new (0, _entity.RenderableEntity)(scene, world, floorMesh, "floor", floorBody);
     floor.addToScene();
     entities.push(floor);
-    const car = new (0, _carDefault.default)(scene, world, "/models/sedan-sports.glb", pivot);
+    const car = new (0, _carDefault.default)(scene, world, "./models/sedan-sports.glb", pivot);
     await car.init([
         0,
         0,
