@@ -2,34 +2,52 @@ import { ColliderDesc, init, RigidBodyDesc, World } from '@dimforge/rapier3d-com
 import Car from 'src/libs/car';
 import { Entity, RenderableEntity } from 'src/libs/entity';
 import RapierDebugRenderer from 'src/utils/debug-renderer';
+import { TBuildScene } from 'src/utils/types';
 import { initBasicScene } from 'src/utils/utils';
-import { BoxGeometry, Clock, Mesh, MeshPhongMaterial } from 'three';
+import { AxesHelper, BoxGeometry, Clock, Mesh, MeshPhongMaterial, Object3D, Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 
 const entities: Entity[] = [];
-const options = {};
+let options = { showAxis: true };
+const config: TBuildScene = {
+    camera: 'pointerLock',
+    cameraPos: [0, 0, 4],
+    fov: 75,
+    lightType: 'directional'
+};
 
 // -----------------------------------------------------------
 // -----------------------------------------------------------
 
-init().then(() => {
+init().then(async () => {
     // initialize the scene
-    const { world, scene, camera, controls, renderer, stats } = initBasicScene({
-        camera: 'pointerLock'
-    });
+    const keyMap: { [key: string]: boolean } = {};
+    const { world, scene, camera, controls, renderer, pivot, stats } = initBasicScene(
+        keyMap,
+        config
+    );
 
     // setup geometry and colliders
-    buildScene(entities, scene, world);
+    await buildScene(entities, scene, world, pivot);
+
+    // setup helpers
+    const rapierDebugRenderer = new RapierDebugRenderer(scene, world);
+    const axisHelper = new AxesHelper(3);
+    options.showAxis && scene.add(axisHelper);
 
     // setup the loop
     const clock = new Clock();
     let delta;
-    const rapierDebugRenderer = new RapierDebugRenderer(scene, world);
 
     // setup the controls
     const gui = new GUI();
     gui.add(rapierDebugRenderer, 'enabled').name('Rapier Degug Renderer');
+    gui.add(options, 'showAxis')
+        .name('Show Axis')
+        .onChange((status: boolean) => {
+            status ? scene.add(axisHelper) : scene.remove(axisHelper);
+        });
 
     function gameLoop() {
         delta = clock.getDelta();
@@ -37,7 +55,7 @@ init().then(() => {
         world.step();
 
         for (const entity of entities) {
-            entity.update();
+            entity.update(world.timestep);
         }
 
         controls instanceof OrbitControls && controls.update();
@@ -53,7 +71,12 @@ init().then(() => {
 // -----------------------------------------------------------
 // -----------------------------------------------------------
 
-function buildScene(entities: Entity[], scene: THREE.Scene, world: World) {
+async function buildScene(
+    entities: Entity[],
+    scene: THREE.Scene,
+    world: World,
+    pivot: Object3D | null
+) {
     // setup the floor
     const floorMesh = new Mesh(new BoxGeometry(100, 1, 100), new MeshPhongMaterial());
     floorMesh.receiveShadow = true;
@@ -65,8 +88,8 @@ function buildScene(entities: Entity[], scene: THREE.Scene, world: World) {
     floor.addToScene();
     entities.push(floor);
 
-    const car = new Car(scene, world);
-    car.addToScene();
+    const car = new Car(scene, world, '/models/sedan-sports.glb', pivot);
+    await car.init([0, 0, 0], new Vector3(0.3, 0, -0.66), new Vector3(0.3, 0, -0.66));
     entities.push(car);
 }
 

@@ -1,5 +1,13 @@
 import { World } from '@dimforge/rapier3d-compat';
-import { PerspectiveCamera, Scene, SpotLight, VSMShadowMap, WebGLRenderer } from 'three';
+import {
+    PerspectiveCamera,
+    Scene,
+    SpotLight,
+    VSMShadowMap,
+    WebGLRenderer,
+    Object3D,
+    DirectionalLight
+} from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
@@ -17,11 +25,18 @@ export function generateCollisionId(members: number[], filters: number[]): numbe
     const filterId = createBitmask(filters);
     return parseInt(memberId + filterId, 2);
 }
-export function initBasicScene(_config?: Partial<TBuildScene>) {
+export function initBasicScene(
+    keyMap: { [key: string]: boolean } = {},
+    _config?: Partial<TBuildScene>
+) {
     const config: TBuildScene = {
         camera: 'orbit',
+        cameraPos: [0, 2, 5],
+        fov: 50,
+        lightType: 'spot',
         ..._config
     };
+    let pivot = null;
     // setup the scene
     const gravity = { x: 0, y: -9.81, z: 0 };
     const world = new World(gravity);
@@ -30,18 +45,28 @@ export function initBasicScene(_config?: Partial<TBuildScene>) {
     const scene = new Scene();
 
     // setup the light
-    const light = new SpotLight(undefined, Math.PI * 10);
-    light.position.set(2.5, 5, 5);
-    light.angle = Math.PI / 3;
-    light.penumbra = 0.5;
-    light.castShadow = true;
+    let light: SpotLight | DirectionalLight;
+    if (config.lightType === 'spot') {
+        light = new SpotLight(undefined, Math.PI * 10);
+        light.angle = Math.PI / 3;
+        light.penumbra = 0.5;
+    } else {
+        light = new DirectionalLight(0xffffff, 0.5);
+    }
     light.shadow.blurSamples = 10;
     light.shadow.radius = 5;
+    light.position.set(2.5, 5, 5);
+    light.castShadow = true;
     scene.add(light);
 
     // setup the camera
-    const camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 2, 5);
+    const camera = new PerspectiveCamera(
+        config.fov,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        100
+    );
+    camera.position.set(...config.cameraPos);
 
     // setup renderer
     const renderer = new WebGLRenderer({ antialias: true });
@@ -71,6 +96,58 @@ export function initBasicScene(_config?: Partial<TBuildScene>) {
             },
             false
         );
+        // followcam
+        pivot = new Object3D();
+        const yaw = new Object3D();
+        yaw.rotateY(0.6);
+        const pitch = new Object3D();
+        scene.add(pivot);
+        pivot.add(yaw);
+        yaw.add(pitch);
+        pitch.add(camera);
+        function onDocumentMouseMove(e: MouseEvent) {
+            yaw.rotation.y -= e.movementX * 0.002;
+            const v = pitch.rotation.x - e.movementY * 0.002;
+
+            // limit range
+            if (v > -1 && v < 0.1) {
+                pitch.rotation.x = v;
+            }
+        }
+
+        function onDocumentMouseWheel(e: WheelEvent) {
+            e.preventDefault();
+            const v = camera.position.z + e.deltaY * 0.005;
+
+            // limit range
+            if (v >= 1 && v <= 10) {
+                camera.position.z = v;
+            }
+        }
+
+        const onDocumentKey = (e: KeyboardEvent) => {
+            keyMap[e.code] = e.type === 'keydown';
+        };
+
+        document.addEventListener('click', () => {
+            renderer.domElement.requestPointerLock();
+        });
+
+        document.addEventListener('pointerlockchange', () => {
+            if (document.pointerLockElement === renderer.domElement) {
+                document.addEventListener('keydown', onDocumentKey);
+                document.addEventListener('keyup', onDocumentKey);
+
+                renderer.domElement.addEventListener('mousemove', onDocumentMouseMove);
+                renderer.domElement.addEventListener('wheel', onDocumentMouseWheel);
+            } else {
+                document.removeEventListener('keydown', onDocumentKey);
+                document.removeEventListener('keyup', onDocumentKey);
+
+                renderer.domElement.removeEventListener('mousemove', onDocumentMouseMove);
+                renderer.domElement.removeEventListener('wheel', onDocumentMouseWheel);
+            }
+        });
     }
 
     // setup stats
@@ -83,6 +160,7 @@ export function initBasicScene(_config?: Partial<TBuildScene>) {
         renderer,
         camera,
         controls,
-        stats
+        stats,
+        pivot
     };
 }
