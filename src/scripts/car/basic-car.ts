@@ -88,7 +88,7 @@ async function buildScene(
     floor.addToScene();
     entities.push(floor);
 
-    const car = new Car(scene, world, '/models/sedan-sports.glb', pivot);
+    const car = new Car(scene, world, './models/sedan-sports.glb', pivot);
     await car.init([0, 0, 0], new Vector3(0.3, 0, -0.66), new Vector3(0.3, 0, -0.66));
     entities.push(car);
 }
