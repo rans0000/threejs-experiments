@@ -142,8 +142,8 @@ class Car extends Entity {
             const axelId = generateCollisionId([axelCID], [0]);
             const chasisRestitution = 0.1;
             const wheelRestitution = 0.2;
-            const chasisFriction = 3;
-            const wheelFriction = 2;
+            const chasisFriction = 0.9;
+            const wheelFriction = 0.9;
 
             const carShape = (ColliderDesc.convexMesh(new Float32Array(positions)) as ColliderDesc)
                 .setMass(20)
@@ -313,8 +313,8 @@ class Car extends Entity {
         if (Car.keyMap['KeyS']) {
             targetVelocity = 200;
         }
-        (this.wheelBLMotor as PrismaticImpulseJoint).configureMotorVelocity(targetVelocity, 2.0);
-        (this.wheelBRMotor as PrismaticImpulseJoint).configureMotorVelocity(targetVelocity, 2.0);
+        (this.wheelBLMotor as PrismaticImpulseJoint).configureMotorVelocity(targetVelocity, 4.0);
+        (this.wheelBRMotor as PrismaticImpulseJoint).configureMotorVelocity(targetVelocity, 4.0);
 
         let targetSteer = 0;
         if (Car.keyMap['KeyA']) {
