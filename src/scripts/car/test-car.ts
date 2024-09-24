@@ -254,7 +254,13 @@ class TempCar extends Entity {
     }
 
     update(delta: number): void {
-        let targetVelocity = 200;
+        let targetVelocity = 0;
+        if (keyMap['KeyW']) {
+            targetVelocity = -500;
+        }
+        if (keyMap['KeyS']) {
+            targetVelocity = 200;
+        }
         (this.wheelBLMotor as PrismaticImpulseJoint).configureMotorVelocity(targetVelocity, 2.0);
         (this.wheelBRMotor as PrismaticImpulseJoint).configureMotorVelocity(targetVelocity, 2.0);
     }
